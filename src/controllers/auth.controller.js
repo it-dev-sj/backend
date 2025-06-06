@@ -272,8 +272,6 @@ class AuthController {
         googleId: googleId || undefined,
       });
 
-      console.log(process.env.SENDGRID_API_KEY)
-
       // Send verification email only for non-Google users
       const emailSent = await EmailService.sendVerificationEmail(
         email,
