@@ -42,10 +42,28 @@ exports.forwardMessage = async (req, res) => {
 
 // Upload a file (image, audio, etc.)
 exports.uploadFile = async (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-  console.log(req.file);
-  const fileUrl = req.file.path;
-  res.json({ url: fileUrl });
+  try {
+    console.log('Upload request received');
+
+    if (!req.file) {
+      console.log('No file received');
+      throw new Error('No file received');
+    }
+
+    console.log('Uploaded file info:', req.file);
+
+    return res.status(200).json({
+      message: 'Upload successful',
+      url: req.file.path,
+      publicId: req.file.filename,
+    });
+  } catch (err) {
+    console.error('UPLOAD ERROR:', err);
+    res.status(500).json({
+      error: 'Upload failed',
+      details: err.message,
+    });
+  }
 };
 
 // Get a file
