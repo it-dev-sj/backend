@@ -14,7 +14,10 @@ const storage = multer.diskStorage({
     cb(null, uniqueSuffix + '-' + file.originalname);
   }
 });
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  limits: { fileSize: 2 * 1024 * 1024 }, // ✅ Set to 2MB
+});
 
 // Edit a message
 router.patch('/:id', protect, messageController.editMessage);
