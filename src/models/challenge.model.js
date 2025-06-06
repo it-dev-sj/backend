@@ -38,7 +38,7 @@ const challengeSchema = new mongoose.Schema({
       },
       difficulty: {
         type: String,
-        enum: ["Easy", "Medium", "Hard"],
+        enum: ["Easy", "Challenging", "Hard"],
         required: true,
       },
       duration: {
@@ -51,6 +51,14 @@ const challengeSchema = new mongoose.Schema({
       },
       media: {
         type: String,
+        required: false,
+      },
+      fileID: {
+        type: Number,
+        required: false,
+      },
+      moduleItemId: {
+        type: Number,
         required: false,
       },
       questions: [

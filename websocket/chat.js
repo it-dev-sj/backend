@@ -188,7 +188,7 @@ function setupChat(server) {
     });
 
     // Send a group message
-    socket.on('send_group_message', async ({ roomId, senderId, content, fileUrl, fileType }) => {
+    socket.on('send_group_message', async ({ roomId, senderId, content, fileUrl, fileType, originalname }) => {
       try {
         const message = await Message.create({ 
           senderId, 
@@ -196,7 +196,8 @@ function setupChat(server) {
           content,
           fileUrl,
           fileType,
-          status: 'sent'
+          status: 'sent',
+          originalname
         });
         io.to(roomId).emit('new_group_message', message);
         // Emit unread counts to all members except sender
@@ -216,8 +217,8 @@ function setupChat(server) {
     });
 
     // Send a private message
-    socket.on('send_private_message', async ({ senderId, content, recipientId, fileUrl, fileType }) => {
-      console.log('send_private_message', senderId, content, recipientId, fileUrl, fileType);
+    socket.on('send_private_message', async ({ senderId, content, recipientId, fileUrl, fileType, originalname }) => {
+      console.log('send_private_message', senderId, content, recipientId, fileUrl, fileType, originalname);
       try {
         const message = await Message.create({ 
           senderId, 
@@ -225,7 +226,8 @@ function setupChat(server) {
           content,
           fileUrl,
           fileType,
-          status: 'sent'
+          status: 'sent',
+          originalname
         });
         socket.to(recipientId).emit('new_private_message', message);
         socket.emit('new_private_message', message);
@@ -363,7 +365,7 @@ function setupChat(server) {
     });
 
     // Edit a message
-    socket.on('edit_message', async ({ messageId, content, roomId, fileUrl, fileType }) => {
+    socket.on('edit_message', async ({ messageId, content, roomId, fileUrl, fileType, originalname }) => {
       try {
         const message = await Message.findById(messageId);
         if (!message) {
@@ -373,6 +375,7 @@ function setupChat(server) {
         message.content = content;
         if (fileUrl) message.fileUrl = fileUrl;
         if (fileType) message.fileType = fileType;
+        if (originalname) message.originalname = originalname;
         await message.save();
         
         if (roomId) {
@@ -388,7 +391,7 @@ function setupChat(server) {
     });
 
     // Reply to a message
-    socket.on('reply_to_message', async ({ currentUserId, messageId, content, recipientId, roomId, fileUrl, fileType }) => {
+    socket.on('reply_to_message', async ({ currentUserId, messageId, content, recipientId, roomId, fileUrl, fileType, originalname }) => {
       try {
         const originalMessage = await Message.findById(messageId);
         if (!originalMessage) {
@@ -403,6 +406,7 @@ function setupChat(server) {
           replyTo: messageId,
           fileUrl,
           fileType,
+          originalname,
           status: 'sent'
         });
 

@@ -42,6 +42,7 @@ class CanvasController {
       const { id } = req.params;
 
       if (!courseId || !apiToken || !canvasApiUrl) {
+        console.error('Canvas configuration missing:', { courseId, apiToken: !!apiToken, canvasApiUrl });
         return res.status(500).json({
           status: 'error',
           message: 'Canvas configuration is missing'
@@ -49,6 +50,46 @@ class CanvasController {
       }
 
       const response = await axios.get(
+        `${canvasApiUrl}/api/v1/courses/${courseId}/files/${id}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${apiToken}`
+          }
+        }
+      );
+
+      if (!response.data || !response.data.url) {
+        throw new Error('Invalid response from Canvas API');
+      }
+
+      res.status(200).json({
+        status: 'success',
+        data: {
+          url: response.data.url,
+          mime_class: response.data.mime_class
+        }
+      });
+    } catch (error) {
+      console.error('Canvas API Error:', error.response?.data || error.message);
+      res.status(error.response?.status || 500).json({
+        status: 'error',
+        message: error.response?.data?.message || 'Failed to fetch file from Canvas'
+      });
+    }
+  }
+
+  async removeFile(req, res) {
+    try {
+      const { id } = req.params;
+
+      if (!courseId || !apiToken || !canvasApiUrl) {
+        return res.status(500).json({
+          status: 'error',
+          message: 'Canvas configuration is missing'
+        });
+      }
+
+      const response = await axios.delete(
         `${canvasApiUrl}/api/v1/courses/${courseId}/files/${id}`,
         {
           headers: {
@@ -121,7 +162,7 @@ class CanvasController {
 
   async fileUploadSession(req, res) {
     try {
-      const { size, parent_folder_path, content_type } = req.body;
+      const { size, parent_folder_path} = req.body;
 
       if (!courseId || !apiToken || !canvasApiUrl) {
         return res.status(500).json({
@@ -142,7 +183,6 @@ class CanvasController {
         {
           size,
           parent_folder_path,
-          content_type
         },
         {
           headers: {
@@ -211,6 +251,54 @@ class CanvasController {
       res.status(error.response?.status || 500).json({
         status: 'error',
         message: error.response?.data?.message || 'Failed to upload file'
+      });
+    }
+  }
+
+  async addModuleItem(req, res) {
+    try {
+      const { title, content_id, type, module_id} = req.body;
+
+      if (!courseId || !apiToken || !canvasApiUrl) {
+        return res.status(500).json({
+          status: 'error',
+          message: 'Canvas configuration is missing'
+        });
+      }
+
+      if (!title) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Module Item title is required'
+        });
+      }
+
+      const response = await axios.post(
+        `${canvasApiUrl}/api/v1/courses/${courseId}/modules/${module_id}/items`,
+        {
+          module_item: {
+            title,
+            content_id,
+            type,
+          }
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${apiToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      res.status(201).json({
+        status: 'success',
+        data: response.data
+      });
+    } catch (error) {
+      console.error('Canvas API Error:', error.response?.data || error.message);
+      res.status(error.response?.status || 500).json({
+        status: 'error',
+        message: error.response?.data?.message || 'Failed to create Canvas Module Item'
       });
     }
   }

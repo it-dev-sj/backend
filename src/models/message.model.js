@@ -38,6 +38,7 @@ const messageSchema = new mongoose.Schema({
   },
   fileUrl: String,
   fileType: String,
+  originalname: String,
   reactions: [
     {
       userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },

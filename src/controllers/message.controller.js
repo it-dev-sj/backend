@@ -45,7 +45,7 @@ exports.uploadFile = async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
   console.log(req.file);
   const fileUrl = req.file.path;
-  res.json({ url: fileUrl });
+  res.json({ url: fileUrl, originalname: req.file.originalname });
 };
 
 // Get a file
