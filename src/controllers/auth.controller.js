@@ -272,6 +272,8 @@ class AuthController {
         googleId: googleId || undefined,
       });
 
+      console.log(process.env.SENDGRID_API_KEY)
+
       // Send verification email only for non-Google users
       const emailSent = await EmailService.sendVerificationEmail(
         email,
@@ -717,6 +719,7 @@ class AuthController {
     // Save role in session or state parameter
     passport.authenticate("google", {
       scope: ["profile", "email"],
+      prompt: 'select_account',
       state: role, // pass role in state
     })(req, res, next);
   }

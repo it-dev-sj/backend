@@ -43,7 +43,8 @@ exports.forwardMessage = async (req, res) => {
 // Upload a file (image, audio, etc.)
 exports.uploadFile = async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-  const fileUrl = req.file.filename;
+  console.log(req.file);
+  const fileUrl = req.file.path;
   res.json({ url: fileUrl });
 };
 
